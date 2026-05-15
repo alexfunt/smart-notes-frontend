@@ -1,0 +1,125 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 240 18% 98%;
+    --foreground: 240 10% 8%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 8%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 8%;
+
+    --primary: 263 84% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 10% 96%;
+    --secondary-foreground: 240 10% 18%;
+
+    --muted: 240 10% 95%;
+    --muted-foreground: 240 6% 45%;
+
+    --accent: 263 60% 95%;
+    --accent-foreground: 263 84% 35%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 10% 90%;
+    --input: 240 10% 90%;
+    --ring: 263 84% 60%;
+
+    --focus-high: 263 84% 60%;
+    --focus-mid: 217 91% 60%;
+    --focus-low: 240 6% 70%;
+
+    --radius: 14px;
+  }
+
+  .dark {
+    --background: 240 14% 7%;
+    --foreground: 240 10% 96%;
+
+    --card: 240 12% 11%;
+    --card-foreground: 240 10% 96%;
+
+    --popover: 240 12% 11%;
+    --popover-foreground: 240 10% 96%;
+
+    --primary: 263 80% 68%;
+    --primary-foreground: 240 10% 8%;
+
+    --secondary: 240 10% 16%;
+    --secondary-foreground: 240 10% 92%;
+
+    --muted: 240 10% 14%;
+    --muted-foreground: 240 6% 60%;
+
+    --accent: 263 50% 22%;
+    --accent-foreground: 263 90% 88%;
+
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 10% 18%;
+    --input: 240 10% 18%;
+    --ring: 263 80% 68%;
+
+    --focus-high: 263 80% 68%;
+    --focus-mid: 199 89% 65%;
+    --focus-low: 240 6% 38%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body,
+  #root {
+    @apply h-full;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.25);
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: hsl(var(--card) / 0.6);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 999px;
+  }
+
+  .focus-grad-high {
+    background: linear-gradient(90deg, hsl(var(--focus-high)), hsl(var(--focus-mid)));
+  }
+  .focus-grad-low {
+    background: linear-gradient(90deg, hsl(var(--focus-low) / 0.5), hsl(var(--focus-low)));
+  }
+}
