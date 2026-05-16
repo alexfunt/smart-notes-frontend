@@ -48,10 +48,12 @@ export function TaskDetailDialog({ task, open, onOpenChange }: TaskDetailDialogP
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description ?? "");
   const [due, setDue] = useState(toDateInputValue(task.due_date));
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
       setEditing(false);
+      setSaveError(null);
       setTitle(task.title);
       setDescription(task.description ?? "");
       setDue(toDateInputValue(task.due_date));
@@ -64,6 +66,7 @@ export function TaskDetailDialog({ task, open, onOpenChange }: TaskDetailDialogP
 
   async function save() {
     if (!tgId) return;
+    setSaveError(null);
     const titleTrim = title.trim();
     if (!titleTrim) return;
     const payload: Parameters<typeof updateMut.mutateAsync>[0] = {
@@ -74,16 +77,32 @@ export function TaskDetailDialog({ task, open, onOpenChange }: TaskDetailDialogP
       payload.description = description;
     }
     const newDueIso = due ? `${due}T12:00:00Z` : null;
-    const oldDueIso = task.due_date;
-    if ((newDueIso ?? null) !== (oldDueIso ?? null)) {
+    const oldDueDate = task.due_date
+      ? toDateInputValue(task.due_date)
+      : "";
+    if (due !== oldDueDate) {
       payload.due_date = newDueIso;
     }
     if (Object.keys(payload).length === 1) {
       setEditing(false);
       return;
     }
-    await updateMut.mutateAsync(payload);
-    setEditing(false);
+    try {
+      await updateMut.mutateAsync(payload);
+      setEditing(false);
+    } catch (e) {
+      const err = e as {
+        response?: { status?: number; data?: { detail?: string } };
+        message?: string;
+      };
+      const status = err?.response?.status;
+      const detail = err?.response?.data?.detail || err?.message;
+      setSaveError(
+        status
+          ? `Не удалось сохранить (${status})${detail ? `: ${detail}` : ""}`
+          : detail || "Не удалось сохранить"
+      );
+    }
   }
 
   async function remove() {
@@ -174,6 +193,14 @@ export function TaskDetailDialog({ task, open, onOpenChange }: TaskDetailDialogP
           ) : (
             <p className="text-sm italic text-muted-foreground">Без описания.</p>
           )}
+          {saveError ? (
+            <p
+              role="alert"
+              className="rounded-md border border-destructive/50 bg-destructive/10 px-3 py-2 text-xs text-destructive"
+            >
+              {saveError}
+            </p>
+          ) : null}
         </div>
 
         <DialogFooter className="!justify-between sm:!justify-between">
