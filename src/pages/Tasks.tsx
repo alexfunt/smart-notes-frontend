@@ -4,10 +4,12 @@ import { ListTodo, Search } from "lucide-react";
 import { useTelegramId } from "@/lib/auth";
 import { useDeleteTask, useTasks, useToggleTask } from "@/lib/queries";
 import { TaskCard } from "@/components/TaskCard";
+import { ArchivedTasksSection } from "@/components/ArchivedTasksSection";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Empty } from "@/components/ui/Empty";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { splitArchivedTasks } from "@/lib/utils";
 
 type StatusFilter = "all" | "pending" | "done";
 type PriorityFilter = "all" | "low" | "medium" | "high";
@@ -133,18 +135,35 @@ export function TasksPage() {
           }
         />
       ) : (
-        <motion.div layout className="grid gap-2">
-          <AnimatePresence mode="popLayout">
-            {filtered.map((t) => (
-              <TaskCard
-                key={t.id}
-                task={t}
-                onToggle={(id) => toggleMut.mutate(id)}
-                onDelete={(id) => deleteMut.mutate(id)}
-              />
-            ))}
-          </AnimatePresence>
-        </motion.div>
+        (() => {
+          const useSplit = statusF === "all" && sort !== "due";
+          const { active, archived } = useSplit
+            ? splitArchivedTasks(filtered)
+            : { active: filtered, archived: [] as typeof filtered };
+          return (
+            <>
+              <motion.div layout className="grid gap-2">
+                <AnimatePresence mode="popLayout">
+                  {active.map((t) => (
+                    <TaskCard
+                      key={t.id}
+                      task={t}
+                      onToggle={(id) => toggleMut.mutate(id)}
+                      onDelete={(id) => deleteMut.mutate(id)}
+                    />
+                  ))}
+                </AnimatePresence>
+              </motion.div>
+              {useSplit ? (
+                <ArchivedTasksSection
+                  tasks={archived}
+                  onToggle={(id) => toggleMut.mutate(id)}
+                  onDelete={(id) => deleteMut.mutate(id)}
+                />
+              ) : null}
+            </>
+          );
+        })()
       )}
     </div>
   );

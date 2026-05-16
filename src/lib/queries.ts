@@ -116,6 +116,29 @@ export function useCreateTaskFromNote(tgId: number) {
   });
 }
 
+export function useUpdateTask(tgId: number) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (vars: {
+      taskId: number;
+      title?: string;
+      description?: string;
+      due_date?: string | null;
+    }) => {
+      const body: Record<string, unknown> = {};
+      if (vars.title !== undefined) body.title = vars.title;
+      if (vars.description !== undefined) body.description = vars.description;
+      if (vars.due_date !== undefined) body.due_date = vars.due_date;
+      const { data } = await api.patch<Task>(
+        `${tgPath(tgId)}/tasks/${vars.taskId}`,
+        body
+      );
+      return data;
+    },
+    onSuccess: () => invalidateAll(client, tgId),
+  });
+}
+
 export function useToggleTask(tgId: number) {
   const client = useQueryClient();
   return useMutation({

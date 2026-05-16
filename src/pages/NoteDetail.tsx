@@ -16,8 +16,9 @@ import { Textarea } from "@/components/ui/Textarea";
 import { Empty } from "@/components/ui/Empty";
 import { FocusBar } from "@/components/FocusBar";
 import { TaskCard } from "@/components/TaskCard";
+import { ArchivedTasksSection } from "@/components/ArchivedTasksSection";
 import { CreateTaskDialog } from "@/components/CreateTaskDialog";
-import { relativeTime } from "@/lib/utils";
+import { relativeTime, splitArchivedTasks } from "@/lib/utils";
 import { NotebookPen } from "lucide-react";
 
 export function NoteDetailPage() {
@@ -172,26 +173,39 @@ export function NoteDetailPage() {
           <CreateTaskDialog tgId={tgId} userNoteNumber={data.user_note_number} />
         </div>
 
-        {!data.tasks?.length ? (
-          <Empty
-            icon={NotebookPen}
-            title="Задач пока нет"
-            description="Создайте задачу из этой заметки — бот будет напоминать о ней с адаптивным интервалом."
-          />
-        ) : (
-          <div className="grid gap-2">
-            <AnimatePresence mode="popLayout">
-              {data.tasks.map((t) => (
-                <TaskCard
-                  key={t.id}
-                  task={t}
-                  onToggle={(id) => toggleTask.mutate(id)}
-                  onDelete={(id) => deleteTask.mutate(id)}
-                />
-              ))}
-            </AnimatePresence>
-          </div>
-        )}
+        {(() => {
+          const { active, archived } = splitArchivedTasks(data.tasks);
+          if (!active.length && !archived.length) {
+            return (
+              <Empty
+                icon={NotebookPen}
+                title="Задач пока нет"
+                description="Создайте задачу из этой заметки — бот будет напоминать о ней с адаптивным интервалом."
+              />
+            );
+          }
+          return (
+            <>
+              <div className="grid gap-2">
+                <AnimatePresence mode="popLayout">
+                  {active.map((t) => (
+                    <TaskCard
+                      key={t.id}
+                      task={t}
+                      onToggle={(id) => toggleTask.mutate(id)}
+                      onDelete={(id) => deleteTask.mutate(id)}
+                    />
+                  ))}
+                </AnimatePresence>
+              </div>
+              <ArchivedTasksSection
+                tasks={archived}
+                onToggle={(id) => toggleTask.mutate(id)}
+                onDelete={(id) => deleteTask.mutate(id)}
+              />
+            </>
+          );
+        })()}
       </section>
     </div>
   );
